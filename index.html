@@ -2300,50 +2300,93 @@
     // --- Experiencia de App en Móvil (ícono, manifest, instalación, navegación inferior) ---
 
     let deferredInstallPrompt = null;
+    const APP_LOGO_URL = 'https://res.cloudinary.com/dway4iqeh/image/upload/v1787019366/WhatsApp_Image_2026-08-17_at_21.55.05-removebg-preview_flu9q4.png';
 
-    // Genera un ícono de la app (PNG) dinámicamente con canvas y lo usa como favicon/apple-touch-icon,
-    // y arma un manifest.json embebido (data URI) para que "Agregar a pantalla de inicio" luzca como una app real.
+    // Genera el ícono de la app (PNG) a partir del logo real, dibujado sobre un fondo con degradado de marca,
+    // y lo usa como favicon/apple-touch-icon. Arma además un manifest.json embebido (data URI) para que
+    // "Agregar a pantalla de inicio" muestre el ícono correcto y la app se abra a pantalla completa.
+    function drawBrandedIconBackground(ctx) {
+        const grad = ctx.createLinearGradient(0, 0, 512, 512);
+        grad.addColorStop(0, '#0b132b');
+        grad.addColorStop(1, '#00b4c8');
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.roundRect ? ctx.roundRect(0, 0, 512, 512, 96) : ctx.rect(0, 0, 512, 512);
+        ctx.fill();
+    }
+
+    function finalizeIconAndManifest(iconDataUrl) {
+        document.getElementById('app-icon-link').setAttribute('href', iconDataUrl);
+        document.getElementById('app-touch-icon-link').setAttribute('href', iconDataUrl);
+
+        const manifest = {
+            name: 'Simulador de Protocolos Críticos',
+            short_name: 'Simulador Kraibe',
+            start_url: '.',
+            display: 'standalone',
+            orientation: 'portrait-primary',
+            background_color: '#0a0e1a',
+            theme_color: '#0a0e1a',
+            icons: [
+                { src: iconDataUrl, sizes: '512x512', type: 'image/png', purpose: 'any maskable' }
+            ]
+        };
+        const manifestBlob = new Blob([JSON.stringify(manifest)], { type: 'application/manifest+json' });
+        const manifestUrl = URL.createObjectURL(manifestBlob);
+        document.getElementById('app-manifest-link').setAttribute('href', manifestUrl);
+    }
+
     function setupAppIconAndManifest() {
         try {
             const canvas = document.createElement('canvas');
             canvas.width = 512;
             canvas.height = 512;
             const ctx = canvas.getContext('2d');
+            drawBrandedIconBackground(ctx);
 
-            const grad = ctx.createLinearGradient(0, 0, 512, 512);
-            grad.addColorStop(0, '#0b132b');
-            grad.addColorStop(1, '#00b4c8');
-            ctx.fillStyle = grad;
-            ctx.beginPath();
-            ctx.roundRect ? ctx.roundRect(0, 0, 512, 512, 96) : ctx.rect(0, 0, 512, 512);
-            ctx.fill();
+            const logoImg = new Image();
+            logoImg.crossOrigin = 'anonymous';
 
-            ctx.fillStyle = '#ffffff';
-            ctx.font = 'bold 300px -apple-system, Inter, sans-serif';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText('🛡', 256, 280);
-
-            const iconDataUrl = canvas.toDataURL('image/png');
-
-            document.getElementById('app-icon-link').setAttribute('href', iconDataUrl);
-            document.getElementById('app-touch-icon-link').setAttribute('href', iconDataUrl);
-
-            const manifest = {
-                name: 'Simulador de Protocolos Críticos',
-                short_name: 'Simulador Kraibe',
-                start_url: '.',
-                display: 'standalone',
-                orientation: 'portrait-primary',
-                background_color: '#0a0e1a',
-                theme_color: '#0a0e1a',
-                icons: [
-                    { src: iconDataUrl, sizes: '512x512', type: 'image/png', purpose: 'any maskable' }
-                ]
+            logoImg.onload = () => {
+                try {
+                    // Encaja el logo real dentro del ícono, con un margen para que se vea completo (estilo "maskable")
+                    const padding = 90;
+                    const maxSize = 512 - padding * 2;
+                    const ratio = Math.min(maxSize / logoImg.width, maxSize / logoImg.height);
+                    const w = logoImg.width * ratio;
+                    const h = logoImg.height * ratio;
+                    const x = (512 - w) / 2;
+                    const y = (512 - h) / 2;
+                    ctx.drawImage(logoImg, x, y, w, h);
+                    finalizeIconAndManifest(canvas.toDataURL('image/png'));
+                } catch (e) {
+                    // Si el canvas quedó "tainted" (CORS) no se puede volver a leer; se arma un ícono de respaldo limpio
+                    console.warn('No se pudo dibujar el logo real en el ícono, se usa el respaldo:', e);
+                    const fallbackCanvas = document.createElement('canvas');
+                    fallbackCanvas.width = 512;
+                    fallbackCanvas.height = 512;
+                    const fctx = fallbackCanvas.getContext('2d');
+                    drawBrandedIconBackground(fctx);
+                    fctx.fillStyle = '#ffffff';
+                    fctx.font = 'bold 300px -apple-system, Inter, sans-serif';
+                    fctx.textAlign = 'center';
+                    fctx.textBaseline = 'middle';
+                    fctx.fillText('🛡', 256, 280);
+                    finalizeIconAndManifest(fallbackCanvas.toDataURL('image/png'));
+                }
             };
-            const manifestBlob = new Blob([JSON.stringify(manifest)], { type: 'application/manifest+json' });
-            const manifestUrl = URL.createObjectURL(manifestBlob);
-            document.getElementById('app-manifest-link').setAttribute('href', manifestUrl);
+
+            logoImg.onerror = () => {
+                // Respaldo si el logo no carga (ej. sin conexión): ícono con escudo genérico de marca
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 300px -apple-system, Inter, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('🛡', 256, 280);
+                finalizeIconAndManifest(canvas.toDataURL('image/png'));
+            };
+
+            logoImg.src = APP_LOGO_URL;
         } catch (e) {
             console.warn('No se pudo generar el ícono/manifest dinámico de la app:', e);
         }
