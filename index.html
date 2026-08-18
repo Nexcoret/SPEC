@@ -3,8 +3,21 @@
 
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
   <title>Simulador de Capacitación - Guardias de Seguridad</title>
+
+  <!-- Metadatos para que al agregarse a la pantalla de inicio se comporte y se vea como una app -->
+  <meta name="theme-color" content="#0a0e1a" />
+  <meta name="color-scheme" content="dark" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Simulador Kraibe" />
+  <meta name="format-detection" content="telephone=no" />
+  <link id="app-manifest-link" rel="manifest" href="" />
+  <link id="app-icon-link" rel="icon" href="" />
+  <link id="app-touch-icon-link" rel="apple-touch-icon" href="" />
+
   <style>
     :root {
       --bg-primary: #0a0e1a;
@@ -24,14 +37,57 @@
       box-sizing: border-box;
       margin: 0;
       padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html {
+      -webkit-text-size-adjust: 100%;
     }
 
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: linear-gradient(135deg, #0a0e1a 0%, #1a1f35 100%);
+      background: #0a0e1a;
+      /* color sólido de respaldo mientras carga la imagen de fondo */
       color: var(--text-primary);
       min-height: 100vh;
       overflow-x: hidden;
+      overscroll-behavior-y: contain;
+      touch-action: pan-y;
+    }
+
+    /* Modo "app instalada" (standalone / PWA): respeta el notch y la barra de estado */
+    body.standalone-app {
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    /* Imagen de fondo de la plataforma, con overlay oscuro para mantener la legibilidad del contenido */
+    .bg-photo {
+      position: fixed;
+      top: -30px;
+      left: -30px;
+      right: -30px;
+      bottom: -30px;
+      z-index: -1;
+      background-image:
+        radial-gradient(ellipse at center, rgba(10, 14, 26, 0.30) 0%, rgba(10, 14, 26, 0.55) 75%, rgba(10, 14, 26, 0.72) 100%),
+        linear-gradient(135deg, rgba(10, 14, 26, 0.45) 0%, rgba(10, 14, 26, 0.30) 45%, rgba(26, 31, 53, 0.45) 100%),
+        url('https://res.cloudinary.com/dway4iqeh/image/upload/v1787018896/WhatsApp_Image_2026-08-17_at_22.07.50_g5gjib.jpg');
+      background-size: cover;
+      background-position: center center;
+      background-repeat: no-repeat;
+      filter: blur(4px) saturate(1.1) contrast(1.05) brightness(0.95);
+      transform: scale(1.03);
+      transform-origin: center center;
+      pointer-events: none;
+    }
+
+    @supports (background-attachment: fixed) {
+      @media (min-width: 769px) {
+        .bg-photo {
+          background-attachment: fixed;
+        }
+      }
     }
 
     /* Animated background particles */
@@ -90,15 +146,23 @@
     }
 
     .logo {
-      width: 50px;
-      height: 50px;
-      background: linear-gradient(135deg, var(--accent) 0%, #0080ff 100%);
+      height: 96px;
+      width: auto;
+      max-width: 300px;
       border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 24px;
-      box-shadow: 0 4px 20px var(--accent-glow);
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .logo img {
+      height: 100%;
+      width: auto;
+      max-width: 300px;
+      object-fit: contain;
+      display: block;
     }
 
     h1 {
@@ -112,7 +176,7 @@
 
     .subtitle {
       color: var(--text-secondary);
-      font-size: 14px;
+      font-size: 18px;
       margin-top: 5px;
     }
 
@@ -133,6 +197,12 @@
       display: flex;
       align-items: center;
       gap: 8px;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    button:active {
+      transform: scale(0.97);
     }
 
     button.primary {
@@ -749,23 +819,205 @@
       }
     }
 
+    /* ===================== Visualización tipo APP en teléfono ===================== */
     @media (max-width: 768px) {
+      body {
+        padding-bottom: calc(64px + env(safe-area-inset-bottom));
+      }
+
+      .container {
+        padding: 10px 10px calc(10px + env(safe-area-inset-bottom));
+      }
+
+      header {
+        position: sticky;
+        top: env(safe-area-inset-top);
+        z-index: 50;
+        margin: -10px -10px 14px -10px;
+        border-radius: 0 0 18px 18px;
+        padding: calc(12px + env(safe-area-inset-top)) 14px 12px 14px;
+        gap: 12px;
+      }
+
+      .logo {
+        height: 56px;
+        max-width: min(200px, 55vw);
+        border-radius: 10px;
+      }
+
+      .logo img {
+        max-width: min(200px, 55vw);
+      }
+
       h1 {
-        font-size: 20px;
+        font-size: 16px;
+        line-height: 1.25;
+      }
+
+      header .subtitle {
+        display: none;
       }
 
       .header-actions {
         flex-wrap: wrap;
+        gap: 6px;
+      }
+
+      .header-actions button {
+        padding: 8px 10px;
+        font-size: 12px;
+      }
+
+      .card {
+        padding: 16px;
+        border-radius: 14px;
       }
 
       .area-grid {
         grid-template-columns: 1fr;
       }
+
+      /* Botones con área táctil de tamaño "app" (mínimo ~44px) */
+      button {
+        min-height: 44px;
+        font-size: 14px;
+      }
+
+      .choice-btn {
+        min-height: 44px;
+      }
+
+      .user-input {
+        font-size: 16px;
+        /* evita el zoom automático de iOS al enfocar inputs */
+      }
+
+      /* Botonera de acciones del reporte apilada y a ancho completo */
+      #view-report .report-container > div[style*="display: flex"] {
+        flex-direction: column;
+      }
+
+      #view-report .report-container > div[style*="display: flex"] button {
+        width: 100%;
+        margin-left: 0 !important;
+        justify-content: center;
+      }
+    }
+
+    /* Barra de navegación inferior, estilo app nativa (solo visible en teléfono) */
+    .app-bottom-nav {
+      display: none;
+    }
+
+    @media (max-width: 768px) {
+      .app-bottom-nav {
+        display: flex;
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 60;
+        background: rgba(10, 14, 26, 0.92);
+        backdrop-filter: blur(14px);
+        border-top: 1px solid var(--border);
+        padding: 6px 8px calc(6px + env(safe-area-inset-bottom)) 8px;
+        gap: 4px;
+      }
+
+      .app-bottom-nav button {
+        flex: 1;
+        flex-direction: column;
+        gap: 2px;
+        background: transparent;
+        color: var(--text-secondary);
+        border-radius: 12px;
+        padding: 6px 4px;
+        font-size: 10px;
+        font-weight: 600;
+        min-height: 48px;
+      }
+
+      .app-bottom-nav button .abn-icon {
+        font-size: 18px;
+        line-height: 1;
+      }
+
+      .app-bottom-nav button.active {
+        color: var(--accent);
+        background: rgba(0, 217, 255, 0.08);
+      }
+    }
+
+    /* Banner "Agregar a pantalla de inicio" */
+    #install-app-banner {
+      display: none;
+      position: fixed;
+      left: 12px;
+      right: 12px;
+      bottom: 12px;
+      z-index: 70;
+      background: linear-gradient(135deg, var(--bg-card) 0%, rgba(26, 31, 53, 0.96) 100%);
+      border: 1px solid var(--accent);
+      border-radius: 16px;
+      padding: 14px 16px;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    }
+
+    @media (max-width: 768px) {
+      #install-app-banner.visible {
+        display: flex;
+        bottom: calc(76px + env(safe-area-inset-bottom));
+      }
+    }
+
+    @media (min-width: 769px) {
+      #install-app-banner.visible {
+        display: flex;
+      }
+    }
+
+    #install-app-banner .ia-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--accent) 0%, #0080ff 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+
+    #install-app-banner .ia-text {
+      flex: 1;
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    #install-app-banner .ia-text strong {
+      display: block;
+      color: var(--text-primary);
+      font-size: 14px;
+      margin-bottom: 2px;
+    }
+
+    #install-app-banner .ia-actions {
+      display: flex;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    #install-app-banner button {
+      padding: 8px 12px;
+      font-size: 12px;
     }
   </style>
 </head>
 
 <body>
+  <div class="bg-photo" aria-hidden="true"></div>
   <div class="particles" id="particles"></div>
 
   <div id="notification-modal" class="modal">
@@ -777,11 +1029,12 @@
   </div>
 
 
-  <div class="container">
-    <header>
-      <div class="logo">🛡️</div>
+  <div class="container" id="app-root">
+    <header id="app-header">
+      <div class="logo">
+        <img src="https://res.cloudinary.com/dway4iqeh/image/upload/v1787019366/WhatsApp_Image_2026-08-17_at_21.55.05-removebg-preview_flu9q4.png" alt="Logo" />
+      </div>
       <div style="flex: 1;">
-        <h1>Simulador de aplicación de protocolos para Eventos Críticos</h1>
         <div class="subtitle">Entrena decisiones críticas con escenarios realistas y feedback inmediato</div>
       </div>
       <div class="header-actions">
@@ -793,7 +1046,7 @@
     </header>
 
     <div class="main-layout">
-      <main>
+      <main id="main-content">
         <div id="view-area" class="card">
           <h2 style="margin-bottom: 20px;">Selecciona tu área de desempeño</h2>
           <div class="area-grid">
@@ -801,19 +1054,14 @@
               <div class="area-icon">🏪</div>
               <h3>Retail</h3>
               <p style="color: var(--text-secondary);">Mall, supermercados y centros comerciales. Enfoque en lectura de
-                entorno, atención al público, prevención de hurtos, desescalada verbal y crisis psiquiátricas.</p>
+                entorno, atención al público, prevención de hurtos, emergencias médicas, desescalada verbal y crisis
+                psiquiátricas.</p>
             </div>
             <div class="area-card card" data-area="industrial" tabindex="0">
               <div class="area-icon">🏭</div>
               <h3>Industrial</h3>
               <p style="color: var(--text-secondary);">Plantas industriales - seguridad de perímetro, maquinaria,
                 riesgos químicos, sismos y emergencias laborales.</p>
-            </div>
-            <div class="area-card card" data-area="cctv" tabindex="0">
-              <div class="area-icon">📹</div>
-              <h3>CCTV / Central de Monitoreo</h3>
-              <p style="color: var(--text-secondary);">Operación de Central de Monitoreo (SOC). Enfoque en lectura de
-                cámaras, verificación de alarmas, cadena de custodia y coordinación con guardias de terreno.</p>
             </div>
           </div>
 
@@ -915,7 +1163,7 @@
         </div>
       </main>
 
-      <aside class="sidebar">
+      <aside class="sidebar" id="sidebar-panel">
         <div class="card user-panel">
           <h3 style="margin-bottom: 15px;">👤 Usuario</h3>
           <input type="text" class="user-input" id="user-name" placeholder="Ingresa tu Nombre">
@@ -992,11 +1240,40 @@
     </div>
   </div>
 
+  <!-- Tab bar inferior estilo app (solo se muestra en teléfono) -->
+  <nav class="app-bottom-nav" id="app-bottom-nav">
+    <button type="button" data-target="main-content" class="active">
+      <span class="abn-icon">🎯</span>
+      <span>Simulador</span>
+    </button>
+    <button type="button" data-target="sidebar-panel">
+      <span class="abn-icon">📊</span>
+      <span>Resultados</span>
+    </button>
+    <button type="button" data-target="app-header">
+      <span class="abn-icon">👤</span>
+      <span>Usuario</span>
+    </button>
+  </nav>
+
+  <!-- Banner "Agregar a pantalla de inicio" -->
+  <div id="install-app-banner">
+    <div class="ia-icon">🛡️</div>
+    <div class="ia-text">
+      <strong>Instala el Simulador</strong>
+      <span id="install-app-text">Agrégalo a tu pantalla de inicio para usarlo como una app, a pantalla completa.</span>
+    </div>
+    <div class="ia-actions">
+      <button class="ghost" id="btn-install-dismiss">Ahora no</button>
+      <button class="primary" id="btn-install-app">Instalar</button>
+    </div>
+  </div>
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
   <script>
     // Configuración
-    const AREA_LABELS = { retail: 'Retail', industrial: 'Industrial', cctv: 'CCTV / Central de Monitoreo' };
+    const AREA_LABELS = { retail: 'Retail', industrial: 'Industrial' };
     const RESULTS_PREFIX = 'resultados_';
     const DIMENSIONS = ['procedural', 'security', 'comms', 'time', 'empathy'];
     const WEIGHTS = {procedural: 0.4, security: 0.3, comms: 0.15, time: 0.1, empathy: 0.05};
@@ -2020,7 +2297,140 @@
         document.getElementById('sessions-count').textContent = count;
     }
 
+    // --- Experiencia de App en Móvil (ícono, manifest, instalación, navegación inferior) ---
+
+    let deferredInstallPrompt = null;
+
+    // Genera un ícono de la app (PNG) dinámicamente con canvas y lo usa como favicon/apple-touch-icon,
+    // y arma un manifest.json embebido (data URI) para que "Agregar a pantalla de inicio" luzca como una app real.
+    function setupAppIconAndManifest() {
+        try {
+            const canvas = document.createElement('canvas');
+            canvas.width = 512;
+            canvas.height = 512;
+            const ctx = canvas.getContext('2d');
+
+            const grad = ctx.createLinearGradient(0, 0, 512, 512);
+            grad.addColorStop(0, '#0b132b');
+            grad.addColorStop(1, '#00b4c8');
+            ctx.fillStyle = grad;
+            ctx.beginPath();
+            ctx.roundRect ? ctx.roundRect(0, 0, 512, 512, 96) : ctx.rect(0, 0, 512, 512);
+            ctx.fill();
+
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 300px -apple-system, Inter, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('🛡', 256, 280);
+
+            const iconDataUrl = canvas.toDataURL('image/png');
+
+            document.getElementById('app-icon-link').setAttribute('href', iconDataUrl);
+            document.getElementById('app-touch-icon-link').setAttribute('href', iconDataUrl);
+
+            const manifest = {
+                name: 'Simulador de Protocolos Críticos',
+                short_name: 'Simulador Kraibe',
+                start_url: '.',
+                display: 'standalone',
+                orientation: 'portrait-primary',
+                background_color: '#0a0e1a',
+                theme_color: '#0a0e1a',
+                icons: [
+                    { src: iconDataUrl, sizes: '512x512', type: 'image/png', purpose: 'any maskable' }
+                ]
+            };
+            const manifestBlob = new Blob([JSON.stringify(manifest)], { type: 'application/manifest+json' });
+            const manifestUrl = URL.createObjectURL(manifestBlob);
+            document.getElementById('app-manifest-link').setAttribute('href', manifestUrl);
+        } catch (e) {
+            console.warn('No se pudo generar el ícono/manifest dinámico de la app:', e);
+        }
+    }
+
+    // Detecta si ya se está usando como app instalada (standalone) para respetar el notch/status bar
+    function detectStandaloneMode() {
+        const isStandalone = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone === true;
+        if (isStandalone) {
+            document.body.classList.add('standalone-app');
+            const banner = document.getElementById('install-app-banner');
+            if (banner) banner.classList.remove('visible');
+        }
+    }
+
+    // Banner "Agregar a pantalla de inicio" (Android/Chrome usa beforeinstallprompt; iOS Safari se guía manualmente)
+    function setupInstallBanner() {
+        const banner = document.getElementById('install-app-banner');
+        const dismissedKey = 'install_banner_dismissed';
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredInstallPrompt = e;
+            if (!localStorage.getItem(dismissedKey) && !document.body.classList.contains('standalone-app')) {
+                banner.classList.add('visible');
+            }
+        });
+
+        // En iOS Safari no existe beforeinstallprompt: mostramos instrucciones manuales
+        const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+        const isInStandaloneMode = window.navigator.standalone === true;
+        if (isIOS && !isInStandaloneMode && !localStorage.getItem(dismissedKey)) {
+            document.getElementById('install-app-text').textContent = 'En iPhone/iPad: toca el ícono Compartir y luego "Agregar a pantalla de inicio".';
+            document.getElementById('btn-install-app').style.display = 'none';
+            banner.classList.add('visible');
+        }
+
+        document.getElementById('btn-install-app').addEventListener('click', async () => {
+            if (deferredInstallPrompt) {
+                deferredInstallPrompt.prompt();
+                await deferredInstallPrompt.userChoice;
+                deferredInstallPrompt = null;
+            }
+            banner.classList.remove('visible');
+            localStorage.setItem(dismissedKey, '1');
+        });
+
+        document.getElementById('btn-install-dismiss').addEventListener('click', () => {
+            banner.classList.remove('visible');
+            localStorage.setItem(dismissedKey, '1');
+        });
+
+        window.addEventListener('appinstalled', () => {
+            banner.classList.remove('visible');
+            localStorage.setItem(dismissedKey, '1');
+        });
+    }
+
+    // Tab bar inferior estilo app: navega/hace scroll entre las secciones principales
+    function setupBottomNav() {
+        const nav = document.getElementById('app-bottom-nav');
+        if (!nav) return;
+        const buttons = nav.querySelectorAll('button[data-target]');
+
+        buttons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const targetId = btn.getAttribute('data-target');
+                const target = document.getElementById(targetId);
+                if (target && typeof target.scrollIntoView === 'function') {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+                buttons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            });
+        });
+    }
+
+    function initAppExperience() {
+        try { setupAppIconAndManifest(); } catch (e) { console.warn('setupAppIconAndManifest:', e); }
+        try { detectStandaloneMode(); } catch (e) { console.warn('detectStandaloneMode:', e); }
+        try { setupInstallBanner(); } catch (e) { console.warn('setupInstallBanner:', e); }
+        try { setupBottomNav(); } catch (e) { console.warn('setupBottomNav:', e); }
+    }
+
     function init() {
+        initAppExperience();
+
         // 1. Asignar eventos a las tarjetas de área
         document.querySelectorAll('.area-card').forEach(card => {
             card.addEventListener('click', () => {
@@ -2185,7 +2595,8 @@
   <script>
     // Escenarios de ejemplo (Mismos que en la respuesta anterior, funcionales y con 2+ casos por área)
     let SCENARIOS = {
-      // ======================= RETAIL (6 escenarios — basados en el material SENCE) =======================
+      // ======================= RETAIL (6 escenarios: 4 del material SENCE + 2 nuevos, para cubrir temas distintos
+      //                          en vez de repetir 3 veces la misma crisis psiquiátrica) =======================
       "retail": [
         {
           id: 'r_crisis_estres', title: 'Detección de Anomalía de Conducta (Lectura de Entorno)', area: 'retail', difficulty: 'medio', est_time: 4, start: 'n_start',
@@ -2202,31 +2613,31 @@
           }
         },
         {
-          id: 'r_emergencia_psiquiatrica', title: 'Emergencia Psiquiátrica: Distancia Táctica', area: 'retail', difficulty: 'alto', est_time: 5, start: 'n_start',
+          id: 'r_hurto_flagrante', title: 'Hurto Flagrante: Procedimiento de Intervención Legal', area: 'retail', difficulty: 'alto', est_time: 5, start: 'n_start',
           nodes: {
-            n_start: { type: 'info', text: 'Un sujeto perturbado se aproxima gritando y acorta la distancia a menos de 1 metro del guardia. ¿Cómo debe reaccionar?', choices: ['c_a', 'c_b', 'c_c', 'c_d'] },
-            n_end_ok: { type: 'end', text: 'La distancia táctica se restableció a tiempo, ganando margen de reacción y evitando el contacto físico. El sujeto fue derivado a apoyo especializado sin incidentes.' },
-            n_end_fail: { type: 'end', text: 'Al no restablecer la distancia de seguridad, el guardia perdió tiempo y ventaja de reacción, derivando en un contacto físico evitable.' }
+            n_start: { type: 'info', text: 'Un cliente oculta un producto dentro de su chaqueta y camina hacia la salida sin pagar. ¿Cuál es el procedimiento correcto para que la intervención sea legalmente válida?', choices: ['c_a', 'c_b', 'c_c', 'c_d'] },
+            n_end_ok: { type: 'end', text: 'Al esperar la flagrancia real (sobrepasar la línea de cajas sin pagar) antes de intervenir, la detención quedó legalmente respaldada y sin exposición a reclamos por parte del cliente.' },
+            n_end_fail: { type: 'end', text: 'La intervención no cumplió con los requisitos de flagrancia, exponiendo al guardia y a la empresa a una acusación de detención ilegal o de daño a la imagen del cliente.' }
           },
           choices: {
-            c_a: { from: 'n_start', to: 'n_end_fail', effects: { procedural: -10, time: -5 }, desc: 'Retroceder constantemente hasta que el sujeto se canse de caminar' },
-            c_b: { from: 'n_start', to: 'n_end_ok', effects: { procedural: 15, security: 10 }, desc: 'Restablecer estrictamente los 2 metros de "Distancia Táctica" para garantizar el tiempo de reacción y la ventaja táctica' },
-            c_c: { from: 'n_start', to: 'n_end_fail', effects: { security: -20, empathy: -20 }, desc: 'Acortar la distancia para realizar un tacleo inmediato, asumiendo que el diálogo falló' },
-            c_d: { from: 'n_start', to: 'n_end_fail', effects: { security: -10, procedural: -5 }, desc: 'Permanecer estático y permitir que el sujeto se acerque para demostrar que no tiene miedo' }
+            c_a: { from: 'n_start', to: 'n_end_fail', effects: { procedural: -15, security: -5 }, desc: 'Detenerlo de inmediato dentro de la tienda y revisar sus bolsillos, aunque aún no haya pasado la línea de cajas' },
+            c_b: { from: 'n_start', to: 'n_end_ok', effects: { procedural: 15, security: 10 }, desc: 'Mantener vigilancia discreta y esperar a que la persona sobrepase la línea de cajas sin pagar, para que exista flagrancia real antes de intervenir' },
+            c_c: { from: 'n_start', to: 'n_end_fail', effects: { procedural: -10 }, desc: 'Ignorar la situación, ya que el control de hurtos no corresponde a la función del guardia' },
+            c_d: { from: 'n_start', to: 'n_end_fail', effects: { security: -15, procedural: -10 }, desc: 'Perseguirlo y reducirlo físicamente fuera del mall sin haber verificado primero si efectivamente no pagó' }
           }
         },
         {
-          id: 'r_persona_descontrol', title: 'Persona en Descontrol: Desconexión Racional', area: 'retail', difficulty: 'medio', est_time: 4, start: 'n_start',
+          id: 'r_emergencia_medica_desmayo', title: 'Emergencia Médica No Traumática: Desmayo en Sala de Ventas', area: 'retail', difficulty: 'medio', est_time: 4, start: 'n_start',
           nodes: {
-            n_start: { type: 'info', text: 'Una persona descontrolada ignora tus argumentos lógicos y aumenta su agresividad. ¿Por qué ocurre esto y qué principio debe aplicar el guardia?', choices: ['c_a', 'c_b', 'c_c', 'c_d'] },
-            n_end_ok: { type: 'end', text: 'Al validar y neutralizar la emoción antes de razonar, la persona bajó su nivel de activación y la desescalada fue exitosa.' },
-            n_end_fail: { type: 'end', text: 'Insistir en la lógica o en la autoridad mientras la persona está bajo el efecto de la adrenalina solo incrementó la agresividad y el riesgo.' }
+            n_start: { type: 'info', text: 'Un cliente se desploma súbitamente en medio de la sala de ventas y no responde a estímulos verbales. ¿Cuál es la primera acción correcta del guardia?', choices: ['c_a', 'c_b', 'c_c', 'c_d'] },
+            n_end_ok: { type: 'end', text: 'La verificación de signos vitales, la activación oportuna de la red de apoyo médico y el despeje del área permitieron una atención rápida y segura para el cliente.' },
+            n_end_fail: { type: 'end', text: 'La demora o el manejo inadecuado de la emergencia médica pusieron en riesgo la integridad del cliente y retrasaron la llegada de ayuda especializada.' }
           },
           choices: {
-            c_a: { from: 'n_start', to: 'n_end_fail', effects: { empathy: -10, procedural: -5 }, desc: 'Porque el guardia no está hablando con suficiente volumen o autoridad' },
-            c_b: { from: 'n_start', to: 'n_end_fail', effects: { procedural: -10 }, desc: 'Porque el sujeto está fingiendo no entender para ganar tiempo y atacar' },
-            c_c: { from: 'n_start', to: 'n_end_ok', effects: { empathy: 15, procedural: 10 }, desc: 'Debido a la "Desconexión Racional" por adrenalina; la argumentación lógica es inútil hasta que la emoción sea validada y neutralizada' },
-            c_d: { from: 'n_start', to: 'n_end_fail', effects: { security: -15, empathy: -15 }, desc: 'Porque no se le ha amenazado con el uso de la fuerza física todavía' }
+            c_a: { from: 'n_start', to: 'n_end_fail', effects: { procedural: -10, security: -5 }, desc: 'Moverlo de inmediato a la oficina de seguridad para no alarmar a los demás clientes' },
+            c_b: { from: 'n_start', to: 'n_end_ok', effects: { procedural: 15, comms: 10, empathy: 5 }, desc: 'Verificar conciencia y respiración, activar de inmediato al servicio de urgencia/ambulancia y despejar el área sin mover a la persona salvo riesgo inminente' },
+            c_c: { from: 'n_start', to: 'n_end_fail', effects: { security: -15 }, desc: 'Darle agua o algún alimento para que reaccione más rápido' },
+            c_d: { from: 'n_start', to: 'n_end_fail', effects: { procedural: -15, time: -10 }, desc: 'Esperar a que despierte por sí solo antes de llamar a alguien' }
           }
         },
         {
@@ -2333,93 +2744,6 @@
         { id: 'i_fuga_quimica', title: 'Fuga de Químico Corrosivo', area: 'industrial', difficulty: 'medio', est_time: 8, start: 'n_start', nodes: { n_start: {type: 'info', text: 'Se activa una alarma en el sector de almacenamiento. Al llegar, se detecta una fuga lenta de un químico corrosivo (etiqueta AMARILLA).', choices: ['c_isolate', 'c_check_alone', 'c_alarm_full']}, n_isolate: {type: 'event', text: 'Aislas el área con barreras temporales. El olor es perceptible y podría ser peligroso.', choices: ['c_try_contain', 'c_wait_hsm']}, n_alarm_full: {type: 'event', text: 'Activaste la alarma de emergencia y notificaste a HAZMAT. El equipo de respuesta está en camino.', choices: ['c_evac_zone', 'c_wait_in_place']}, n_end_ok: {type: 'end', text: 'La fuga fue contenida con éxito por el equipo HAZMAT sin riesgo para el personal. Procedimiento de respuesta de emergencia correcto.'}, n_end_fail: {type: 'end', text: 'La fuga escaló antes de la llegada del personal. Hubo una exposición leve y la producción se detuvo por horas.'} }, choices: { c_isolate: {from: 'n_start', to: 'n_isolate', effects: {procedural: 10, security: 5, time: 5}, desc: 'Aislar el área inmediata y notificar al supervisor'}, c_check_alone: {from: 'n_start', to: 'n_end_fail', effects: {security: -15, procedural: -10}, desc: 'Acercarse para verificar la válvula sin EPP ni apoyo'}, c_alarm_full: {from: 'n_start', to: 'n_alarm_full', effects: {procedural: 15, comms: 10, time: 5}, desc: 'Activar alarma y llamar al equipo de respuesta a materiales peligrosos (HAZMAT)'}, c_try_contain: {from: 'n_isolate', to: 'n_end_fail', effects: {security: -10}, desc: 'Intentar contener la fuga sin EPP ni ser personal HAZMAT'}, c_wait_hsm: {from: 'n_isolate', to: 'n_end_ok', effects: {procedural: 10, security: 5}, desc: 'Mantener el aislamiento y esperar al equipo especializado'}, c_evac_zone: {from: 'n_alarm_full', to: 'n_end_ok', effects: {procedural: 5, security: 5}, desc: 'Proceder con la evacuación perimetral de la zona de riesgo'}, c_wait_in_place: {from: 'n_alarm_full', to: 'n_end_fail', effects: {security: -5, time: -5}, desc: 'Esperar al equipo HAZMAT sin evacuar personal no esencial'} } },
         { id: 'i_accidente_maquina', title: 'Accidente con Atrapamiento en Maquinaria', area: 'industrial', difficulty: 'alto', est_time: 10, start: 'n_start', nodes: { n_start: {type: 'info', text: 'Un operador de montacargas ha quedado atrapado por una carga que cayó. Está consciente, pero herido y la máquina sigue encendida.', choices: ['c_first_aid', 'c_isolate_power', 'c_call_rescue']}, n_isolate_power: {type: 'event', text: 'Has cortado la energía principal de la máquina y la zona, asegurando la escena de riesgos secundarios.', choices: ['c_start_extrication', 'c_wait_rescue']}, n_call_rescue: {type: 'event', text: 'Llamaste a emergencias y al equipo de rescate interno. Tardan 5 minutos en llegar.', choices: ['c_first_aid_wait', 'c_direct_traffic']}, n_end_ok: {type: 'end', text: 'El operador fue rescatado con heridas leves. La prioridad de seguridad de la escena fue crítica para el éxito.'}, n_end_fail: {type: 'end', text: 'El operador sufrió más daños por un rescate improvisado o por una falla secundaria (ej. incendio menor).' } }, choices: { c_first_aid: {from: 'n_start', to: 'n_end_fail', effects: {security: -10, time: -5}, desc: 'Intentar primeros auxilios sin asegurar la escena (riesgo de derrumbes/fluidos)'}, c_isolate_power: {from: 'n_start', to: 'n_isolate_power', effects: {procedural: 15, security: 10, time: 5}, desc: 'Priorizar el aislamiento de riesgos (energía, fluidos) y luego llamar'}, c_call_rescue: {from: 'n_start', to: 'n_call_rescue', effects: {comms: 10, time: 5}, desc: 'Llamar al equipo de rescate y emergencias inmediatamente'}, c_start_extrication: {from: 'n_isolate_power', to: 'n_end_fail', effects: {security: -15, procedural: -10}, desc: 'Intentar sacar al operador sin el equipo de rescate especializado'}, c_wait_rescue: {from: 'n_isolate_power', to: 'n_end_ok', effects: {procedural: 10, security: 5, time: 10}, desc: 'Mantener la seguridad de la escena y esperar al equipo especializado'}, c_first_aid_wait: {from: 'n_call_rescue', to: 'n_end_ok', effects: {empathy: 5, procedural: 5, time: 5}, desc: 'Dar soporte psicológico y primeros auxilios básicos mientras llega el rescate'}, c_direct_traffic: {from: 'n_call_rescue', to: 'n_end_fail', effects: {procedural: -5}, desc: 'Ir a dirigir el tráfico de la planta en lugar de asistir al accidentado'} } }
       ],
-      // ======================= CCTV / CENTRAL DE MONITOREO (1 basado en el material SENCE + 5 nuevos, propios de operación SOC) =======================
-      "cctv": [
-        {
-          id: 'cctv_fase_cero', title: 'Intento de Intrusión: Intervención en Fase Cero', area: 'cctv', difficulty: 'medio', est_time: 4, start: 'n_start',
-          nodes: {
-            n_start: { type: 'info', text: 'Un individuo merodea una zona crítica química observando cámaras y accesos. ¿Cuál es tu acción inmediata en "fase cero" como operador de CCTV/GGSS?', choices: ['c_a', 'c_b', 'c_c', 'c_d'] },
-            n_end_ok: { type: 'end', text: 'La detección temprana y el reporte estructurado de la conducta anómala permitieron activar a tiempo al guardia de terreno, evitando el ingreso del sujeto.' },
-            n_end_fail: { type: 'end', text: 'La demora o la falta de reporte oportuno permitieron que el sujeto avanzara en su intento de intrusión sin ser detectado a tiempo.' }
-          },
-          choices: {
-            c_a: { from: 'n_start', to: 'n_end_fail', effects: { procedural: -10, security: -10 }, desc: 'Esperar a que el sujeto intente ingresar para realizar la detención en flagrancia' },
-            c_b: { from: 'n_start', to: 'n_end_ok', effects: { procedural: 15, comms: 10, security: 10 }, desc: 'Realizar una intervención en fase cero mediante la detección temprana y el reporte de la conducta anómala conforme a la lectura del entorno' },
-            c_c: { from: 'n_start', to: 'n_end_fail', effects: { procedural: -15 }, desc: 'Ignorar la situación si el sujeto posee una credencial visible, asumiendo que es personal autorizado' },
-            c_d: { from: 'n_start', to: 'n_end_fail', effects: { procedural: -10, comms: -5 }, desc: 'Solicitar de inmediato la presencia de Carabineros antes de verificar el parámetro de normalidad' }
-          }
-        },
-        {
-          id: 'cctv_falsa_alarma', title: 'Verificación de Alarma de Movimiento Nocturno', area: 'cctv', difficulty: 'medio', est_time: 4, start: 'n_start',
-          nodes: {
-            n_start: { type: 'info', text: 'En horario nocturno se activa una alarma de movimiento en el perímetro de una planta industrial. La imagen es poco clara y podría ser un animal o una persona. ¿Cómo procede el operador de CCTV?', choices: ['c_a', 'c_b', 'c_c', 'c_d'] },
-            n_end_ok: { type: 'end', text: 'La verificación cruzada entre cámaras y el uso de PTZ/zoom permitieron confirmar la naturaleza del evento y documentarlo correctamente antes de decidir.' },
-            n_end_fail: { type: 'end', text: 'La decisión apresurada (descartar o escalar sin verificar) generó una fatiga de alarma o una movilización innecesaria, perdiendo credibilidad del sistema.' }
-          },
-          choices: {
-            c_a: { from: 'n_start', to: 'n_end_fail', effects: { procedural: -15, security: -10 }, desc: 'Descartar la alarma sin verificar, asumiendo que es una activación habitual del sector (fatiga de alarma)' },
-            c_b: { from: 'n_start', to: 'n_end_ok', effects: { procedural: 15, security: 10, comms: 5 }, desc: 'Verificar múltiples cámaras y usar zoom/PTZ antes de descartar o escalar, documentando el evento' },
-            c_c: { from: 'n_start', to: 'n_end_fail', effects: { procedural: -10, comms: -5 }, desc: 'Escalar de inmediato a fuerza pública sin verificar la imagen' },
-            c_d: { from: 'n_start', to: 'n_end_fail', effects: { procedural: -15, security: -5 }, desc: 'Silenciar la alarma y continuar con otras tareas sin dejar registro del evento' }
-          }
-        },
-        {
-          id: 'cctv_perdida_senal', title: 'Pérdida de Señal en Cámara Crítica', area: 'cctv', difficulty: 'facil', est_time: 3, start: 'n_start',
-          nodes: {
-            n_start: { type: 'info', text: 'Durante el turno, la cámara que cubre un punto de acceso de alto riesgo pierde señal repentinamente. ¿Qué debe hacer el operador de CCTV?', choices: ['c_a', 'c_b', 'c_c', 'c_d'] },
-            n_end_ok: { type: 'end', text: 'El evento quedó registrado, soporte técnico fue notificado y se reforzó la vigilancia del punto ciego con rondas físicas, minimizando el riesgo mientras se restablecía la señal.' },
-            n_end_fail: { type: 'end', text: 'La falta de registro o de compensación operativa dejó un punto de acceso crítico sin cobertura efectiva durante un periodo prolongado.' }
-          },
-          choices: {
-            c_a: { from: 'n_start', to: 'n_end_fail', effects: { procedural: -15 }, desc: 'Ignorar la caída de señal, asumiendo que se trata de una falla técnica temporal' },
-            c_b: { from: 'n_start', to: 'n_end_ok', effects: { procedural: 15, comms: 10, security: 10 }, desc: 'Registrar el evento, notificar a soporte técnico y reforzar la vigilancia de zonas colindantes/rondas físicas mientras se restablece la señal' },
-            c_c: { from: 'n_start', to: 'n_end_fail', effects: { security: -10, procedural: -5 }, desc: 'Detener el monitoreo del resto de las cámaras para enfocarse solo en el ticket técnico' },
-            c_d: { from: 'n_start', to: 'n_end_fail', effects: { procedural: -15, security: -5 }, desc: 'Reiniciar el DVR sin autorización ni registro durante el turno' }
-          }
-        },
-        {
-          id: 'cctv_cadena_custodia', title: 'Solicitud de Grabaciones: Cadena de Custodia', area: 'cctv', difficulty: 'alto', est_time: 5, start: 'n_start',
-          nodes: {
-            n_start: { type: 'info', text: 'Una persona que dice ser de Carabineros solicita telefónicamente una copia inmediata de las grabaciones de un incidente. ¿Cómo debe actuar el operador de CCTV?', choices: ['c_a', 'c_b', 'c_c', 'c_d'] },
-            n_end_ok: { type: 'end', text: 'Al verificar la identidad y seguir el protocolo de cadena de custodia, la entrega de la grabación quedó respaldada legalmente y sin riesgo de vulnerar la evidencia.' },
-            n_end_fail: { type: 'end', text: 'Se comprometió la cadena de custodia o la seguridad de la información, generando riesgo legal para la empresa y el cliente.' }
-          },
-          choices: {
-            c_a: { from: 'n_start', to: 'n_end_fail', effects: { procedural: -15, security: -10 }, desc: 'Entregar de inmediato el archivo de video por USB al solicitante para agilizar el trámite' },
-            c_b: { from: 'n_start', to: 'n_end_ok', effects: { procedural: 15, security: 10, comms: 10 }, desc: 'Verificar identidad y solicitud formal, seguir el protocolo de cadena de custodia y escalar al supervisor/cliente antes de entregar cualquier grabación' },
-            c_c: { from: 'n_start', to: 'n_end_fail', effects: { comms: -10, procedural: -5 }, desc: 'Negarse a toda solicitud sin excepción, incluso a los canales formales de la propia gerencia' },
-            c_d: { from: 'n_start', to: 'n_end_fail', effects: { security: -20, procedural: -10 }, desc: 'Compartir las credenciales de acceso remoto para que el tercero revise directamente el sistema' }
-          }
-        },
-        {
-          id: 'cctv_correlacion_camaras', title: 'Correlación de Cámaras: Merodeo en Estacionamiento', area: 'cctv', difficulty: 'medio', est_time: 4, start: 'n_start',
-          nodes: {
-            n_start: { type: 'info', text: 'Un individuo es visto en varias cámaras probando las manillas de vehículos estacionados. ¿Cuál es la respuesta correcta del operador de CCTV?', choices: ['c_a', 'c_b', 'c_c', 'c_d'] },
-            n_end_ok: { type: 'end', text: 'La correlación entre cámaras y la coordinación con el guardia de terreno permitieron una intervención oportuna, evitando el delito sin perder de vista al sujeto.' },
-            n_end_fail: { type: 'end', text: 'La falta de coordinación o el seguimiento pasivo permitieron que el sujeto forzara un vehículo o escapara del sector sin ser interceptado.' }
-          },
-          choices: {
-            c_a: { from: 'n_start', to: 'n_end_fail', effects: { procedural: -10, security: -10 }, desc: 'Esperar a que fuerce una puerta para confirmar el delito con certeza absoluta' },
-            c_b: { from: 'n_start', to: 'n_end_ok', effects: { procedural: 15, comms: 10, security: 10 }, desc: 'Correlacionar el patrón en las cámaras del sector, alertar a la ronda/guardia de terreno con la ubicación y un reporte descriptivo, y mantener seguimiento visual continuo' },
-            c_c: { from: 'n_start', to: 'n_end_fail', effects: { procedural: -10, comms: -5 }, desc: 'Activar la sirena general del estacionamiento sin coordinar con el personal en terreno' },
-            c_d: { from: 'n_start', to: 'n_end_fail', effects: { procedural: -15, security: -5 }, desc: 'Abandonar el monitoreo de esa cámara y seguir la ronda habitual de barrido' }
-          }
-        },
-        {
-          id: 'cctv_traspaso_turno', title: 'Traspaso de Turno: Registro de Eventos Abiertos', area: 'cctv', difficulty: 'facil', est_time: 3, start: 'n_start',
-          nodes: {
-            n_start: { type: 'info', text: 'Termina tu turno como operador de CCTV y quedan incidentes abiertos sin resolución. ¿Qué debe hacer antes de retirarse?', choices: ['c_a', 'c_b', 'c_c', 'c_d'] },
-            n_end_ok: { type: 'end', text: 'El traspaso de turno documentado permitió que el operador entrante continuara el seguimiento de los eventos abiertos sin pérdida de información.' },
-            n_end_fail: { type: 'end', text: 'La falta de un traspaso formal generó pérdida de continuidad operativa y eventos abiertos sin seguimiento.' }
-          },
-          choices: {
-            c_a: { from: 'n_start', to: 'n_end_fail', effects: { procedural: -15, comms: -10 }, desc: 'Retirarse sin informar, ya que "no es su problema" continuar' },
-            c_b: { from: 'n_start', to: 'n_end_ok', effects: { procedural: 15, comms: 10 }, desc: 'Realizar el traspaso de turno documentado (bitácora) detallando eventos abiertos, estado de cámaras y pendientes al operador entrante' },
-            c_c: { from: 'n_start', to: 'n_end_fail', effects: { procedural: -10, comms: -10 }, desc: 'Resumir verbalmente sin dejar registro escrito, confiando en la memoria del operador entrante' },
-            c_d: { from: 'n_start', to: 'n_end_fail', effects: { procedural: -15, security: -5 }, desc: 'Cerrar todos los eventos pendientes sin resolución solo para dejar la bitácora "limpia"' }
-          }
-        }
-      ]
     };
   </script>
 </body>
